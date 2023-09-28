@@ -1,5 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,8 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() {
                   state = CalendarScreenState.loading;
                 });
-                if ((await DeviceCalendarPlugin().requestPermissions())
-                    .isSuccess) {
+                if ((await Permission.calendar.request()).isGranted) {
                   calendars = (await deviceCalendarPlugin.retrieveCalendars())
                       .data as List<Calendar>;
                   final startDate =
@@ -70,10 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             ));
                     events.addAll(calendarEvents.data as List<Event>);
                   }
+                  setState(() {
+                    state = CalendarScreenState.loaded;
+                  });
+                } else {
+                  setState(() {
+                    state = CalendarScreenState.init;
+                  });
                 }
-                setState(() {
-                  state = CalendarScreenState.loaded;
-                });
               },
               child: const Text("Import Calendar")),
         );
